@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../.vscode/project/mw.html"
+		},
+		{
+			"name": "sharon",
+			"path": "../../../../../.vscode/project/sharon"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "sharon"
+	}
+}
