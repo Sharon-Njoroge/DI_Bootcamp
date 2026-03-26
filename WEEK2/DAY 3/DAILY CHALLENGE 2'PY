@@ -1,0 +1,82 @@
+import math
+
+class Circle:
+    def __init__(self, radius=None, diameter=None):
+        if radius is not None:
+            self.radius = radius
+        elif diameter is not None:
+            self.radius = diameter / 2
+        else:
+            raise ValueError("You must specify either radius or diameter.")
+
+    @property
+    def diameter(self):
+        return self.radius * 2
+
+    @diameter.setter
+    def diameter(self, value):
+        self.radius = value / 2
+
+    @property
+    def area(self):
+        return math.pi * (self.radius ** 2)
+
+    def __str__(self):
+        return f"Circle(radius={self.radius:.2f}, diameter={self.diameter:.2f}, area={self.area:.2f})"
+
+    def __repr__(self):
+        return f"Circle({self.radius})"
+
+    def __add__(self, other):
+        if isinstance(other, Circle):
+            return Circle(radius=self.radius + other.radius)
+        raise TypeError("Can only add another Circle instance.")
+
+    # Comparison methods for sorting and logic
+    def __lt__(self, other):
+        return self.radius < other.radius
+
+    def __gt__(self, other):
+        return self.radius > other.radius
+
+    def __eq__(self, other):
+        return self.radius == other.radius
+
+# --- Testing the Implementation ---
+c1 = Circle(radius=5)
+c2 = Circle(diameter=20)
+
+print(f"C1: {c1}")
+print(f"C2 Diameter: {c2.diameter}")
+print(f"C1 + C2 Radius: {(c1 + c2).radius}")
+print(f"Is C2 > C1? {c2 > c1}")
+
+circles = [Circle(10), Circle(2), Circle(7)]
+circles.sort()
+print(f"Sorted circles: {circles}")
+
+import turtle
+
+def draw_circles(circle_list):
+    screen = turtle.Screen()
+    t = turtle.Turtle()
+    t.speed(0)
+    
+    # Move starting position to the left
+    t.penup()
+    t.goto(-200, 0)
+    t.pendown()
+    
+    for c in circle_list:
+        # Draw the circle (radius * scale for visibility)
+        t.circle(c.radius * 5)
+        
+        # Move forward to draw the next one
+        t.penup()
+        t.forward(c.diameter * 5 + 10)
+        t.pendown()
+        
+    screen.exitonclick()
+
+# Draw the sorted list from the previous code
+# draw_circles(circles)
