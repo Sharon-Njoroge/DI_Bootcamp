@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Not Bad Exercise</title>
+</head>
+<body>
+
+<h2>Result:</h2>
+<p id="output"></p>
+
+<script>
+    // Step 1: Create the sentence
+    let sentence = "This dinner is not that bad ! You cook well";
+
+    // Step 2: Find positions of "not" and "bad"
+    let wordNot = sentence.indexOf("not");
+    let wordBad = sentence.indexOf("bad");
+
+    // Step 3: Apply the condition
+    if (wordNot !== -1 && wordBad !== -1 && wordBad > wordNot) {
+        let result = sentence.slice(0, wordNot) + "good" + sentence.slice(wordBad + 3);
+        document.getElementById("output").innerText = result;
+        console.log(result);
+    } else {
+        document.getElementById("output").innerText = sentence;
+        console.log(sentence);
+    }
+</script>
+
+</body>
+</html>
