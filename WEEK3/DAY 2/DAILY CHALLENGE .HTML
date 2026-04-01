@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Challenge: Create a Solar System</title>
+    <style>
+        /* General Setup */
+        body {
+            background-color: black;
+            padding: 20px;
+            font-family: sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .listPlanets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 50px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Planet Styling */
+        .planet {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 100px; /* Centers text vertically */
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Moon Styling */
+        .moon {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgb(237, 237, 237);
+            border: 1px solid gray;
+            /* Positioning logic handled by JS */
+        }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align: center;">The JavaScript Solar System</h1>
+    
+    <section class="listPlanets"></section>
+
+    <script>
+        // 1. Data Structure: Array of Objects
+        // This is better than a simple array because it stores multiple properties per planet
+        const planets = [
+            { name: "Mercury", color: "#A5A5A5", moons: 0 },
+            { name: "Venus", color: "#E3BB76", moons: 0 },
+            { name: "Earth", color: "#2271B3", moons: 1 },
+            { name: "Mars", color: "#E27B58", moons: 2 },
+            { name: "Jupiter", color: "#D39C7E", moons: 79 },
+            { name: "Saturn", color: "#C5AB6E", moons: 82 },
+            { name: "Uranus", color: "#BBE1E4", moons: 27 },
+            { name: "Neptune", color: "#6081FF", moons: 14 }
+        ];
+
+        // 2. Target the section
+        const section = document.querySelector(".listPlanets");
+
+        // 3. Loop through the planets
+        planets.forEach((planetData, index) => {
+            // Create Planet Div
+            const planetDiv = document.createElement("div");
+            planetDiv.classList.add("planet");
+            
+            // Set name and color
+            planetDiv.innerText = planetData.name;
+            planetDiv.style.backgroundColor = planetData.color;
+
+            // 4. Bonus: Create Moons
+            // We limit the visual display for planets with 80+ moons to avoid crashing the browser
+            const displayMoons = planetData.moons > 10 ? 10 : planetData.moons;
+
+            for (let i = 0; i < displayMoons; i++) {
+                const moonDiv = document.createElement("div");
+                moonDiv.classList.add("moon");
+
+                // Logic to scatter moons around the planet
+                // Uses basic trigonometry to place them in a circle
+                const angle = (i / displayMoons) * (Math.PI * 2);
+                const distance = 70; // Distance from center of planet
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+
+                moonDiv.style.left = (50 + x - 7) + "px"; 
+                moonDiv.style.top = (50 + y - 7) + "px";
+
+                planetDiv.appendChild(moonDiv);
+            }
+
+            // 5. Append to the page
+            section.appendChild(planetDiv);
+        });
+    </script>
+</body>
+</html>
