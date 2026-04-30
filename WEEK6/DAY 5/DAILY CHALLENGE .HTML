@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Emoji Guessing Game</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f9; }
+        #emoji-display { font-size: 5rem; margin: 20px; }
+        .option-btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: 1px solid #ccc; border-radius: 5px; }
+        #feedback { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Guess the Emoji!</h1>
+    <div id="score-board">Score: <span id="score">0</span></div>
+    
+    <div id="emoji-display">?</div>
+    <div id="options-container"></div>
+    <div id="feedback"></div>
+
+    <script>
+        async function loadNewQuestion() {
+            const response = await fetch('/api/new-question');
+            const data = await response.json();
+            
+            document.getElementById('emoji-display').innerText = data.emoji;
+            const container = document.getElementById('options-container');
+            container.innerHTML = ''; // Clear old buttons
+
+            data.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = option;
+                btn.onclick = () => submitGuess(option);
+                container.appendChild(btn);
+            });
+        }
+
+        async function submitGuess(name) {
+            const response = await fetch('/api/guess', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guess: name })
+            });
+            
+            const result = await response.json();
+            const feedback = document.getElementById('feedback');
+            
+            if (result.correct) {
+                feedback.innerText = "✅ Correct! +10 Points";
+                feedback.style.color = "green";
+            } else {
+                feedback.innerText = `❌ Wrong! It was ${result.correctName}`;
+                feedback.style.color = "red";
+            }
+
+            document.getElementById('score').innerText = result.currentScore;
+            
+            // Wait 1.5 seconds then load next question
+            setTimeout(loadNewQuestion, 1500);
+        }
+
+        // Initial Load
+        loadNewQuestion();
+    </script>
+</body>
+</html>
