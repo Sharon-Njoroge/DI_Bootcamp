@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redux Todo List</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
+    <script src="https://unpkg.com/react-redux@8.1.3/dist/react-redux.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f3f4f6;
+            border-radius: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .todo-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .add-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .filter-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .filter-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-tab:hover:not(.active) {
+            color: #374151;
+        }
+
+        .todo-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .todo-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .todo-list::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 3px;
+        }
+
+        .todo-list::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            animation: itemSlideIn 0.3s ease-out;
+        }
+
+        @keyframes itemSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .todo-item:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateX(4px);
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+            background: #f9fafb;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox:hover {
+            border-color: #667eea;
+        }
+
+        .checkbox.checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 1rem;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .delete-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #fee2e2;
+            color: #ef4444;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .todo-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: #6b7280;
+        }
+
+        .clear-completed {
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .clear-completed:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fecaca;
+        }
+
+        .priority-select {
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .priority-select:focus {
+            border-color: #667eea;
+        }
+
+        .priority-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .priority-low {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            .stats {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { createStore } = Redux;
+        const { Provider, connect } = ReactRedux;
+        const { useState, useEffect } = React;
+
+        // ==================== ACTION TYPES ====================
+        const ADD_TODO = 'ADD_TODO';
+        const TOGGLE_TODO = 'TOGGLE_TODO';
+        const REMOVE_TODO = 'REMOVE_TODO';
+        const SET_FILTER = 'SET_FILTER';
+        const CLEAR_COMPLETED = 'CLEAR_COMPLETED';
+
+        // ==================== ACTION CREATORS ====================
+        const addTodo = (text, priority = 'medium') => ({
+            type: ADD_TODO,
+            payload: {
+                id: Date.now() + Math.random(),
+                text,
+                priority,
+                completed: false,
+                createdAt: new Date().toISOString()
+            }
+        });
+
+        const toggleTodo = (id) => ({
+            type: TOGGLE_TODO,
+            payload: { id }
+        });
+
+        const removeTodo = (id) => ({
+            type: REMOVE_TODO,
+            payload: { id }
+        });
+
+        const setFilter = (filter) => ({
+            type: SET_FILTER,
+            payload: { filter }
+        });
+
+        const clearCompleted = () => ({
+            type: CLEAR_COMPLETED
+        });
+
+        // ==================== INITIAL STATE ====================
+        const initialState = {
+            todos: [
+                { id: 1, text: 'Learn React-Redux basics', priority: 'high', completed: false, createdAt: new Date().toISOString() },
+                { id: 2, text: 'Build a Todo List app', priority: 'high', completed: true, createdAt: new Date().toISOString() },
+                { id: 3, text: 'Master Redux DevTools', priority: 'medium', completed: false, createdAt: new Date().toISOString() },
+                { id: 4, text: 'Style with CSS animations', priority: 'low', completed: false, createdAt: new Date().toISOString() }
+            ],
+            filter: 'all' // 'all', 'active', 'completed'
+        };
+
+        // ==================== REDUCER ====================
+        const todoReducer = (state = initialState, action) => {
+            switch (action.type) {
+                case ADD_TODO:
+                    return {
+                        ...state,
+                        todos: [action.payload, ...state.todos]
+                    };
+
+                case TOGGLE_TODO:
+                    return {
+                        ...state,
+                        todos: state.todos.map(todo =>
+                            todo.id === action.payload.id
+                                ? { ...todo, completed: !todo.completed }
+                                : todo
+                        )
+                    };
+
+                case REMOVE_TODO:
+                    return {
+                        ...state,
+                        todos: state.todos.filter(todo => todo.id !== action.payload.id)
+                    };
+
+                case SET_FILTER:
+                    return {
+                        ...state,
+                        filter: action.payload.filter
+                    };
+
+                case CLEAR_COMPLETED:
+                    return {
+                        ...state,
+                        todos: state.todos.filter(todo => !todo.completed)
+                    };
+
+                default:
+                    return state;
+            }
+        };
+
+        // ==================== STORE ====================
+        const store = createStore(
+            todoReducer,
+            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+        );
+
+        // ==================== COMPONENTS ====================
+
+        // Stats Component
+        const Stats = ({ total, active, completed }) => (
+            <div className="stats">
+                <div className="stat-item">
+                    <div className="stat-value">{total}</div>
+                    <div className="stat-label">Total</div>
+                </div>
+                <div className="stat-item">
+                    <div className="stat-value" style={{ color: '#667eea' }}>{active}</div>
+                    <div className="stat-label">Active</div>
+                </div>
+                <div className="stat-item">
+                    <div className="stat-value" style={{ color: '#10b981' }}>{completed}</div>
+                    <div className="stat-label">Done</div>
+                </div>
+            </div>
+        );
+
+        const mapStatsToProps = (state) => ({
+            total: state.todos.length,
+            active: state.todos.filter(t => !t.completed).length,
+            completed: state.todos.filter(t => t.completed).length
+        });
+
+        const ConnectedStats = connect(mapStatsToProps)(Stats);
+
+        // TodoItem Component
+        const TodoItem = ({ todo, onToggle, onRemove }) => (
+            <li className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+                <div 
+                    className={`checkbox ${todo.completed ? 'checked' : ''}`}
+                    onClick={() => onToggle(todo.id)}
+                />
+                <span className="todo-text">
+                    {todo.text}
+                    <span className={`priority-badge priority-${todo.priority}`}>
+                        {todo.priority}
+                    </span>
+                </span>
+                <button 
+                    className="delete-btn"
+                    onClick={() => onRemove(todo.id)}
+                    title="Delete todo"
+                >
+                    ×
+                </button>
+            </li>
+        );
+
+        // TodoList Component
+        const TodoList = ({ todos, filter, toggleTodo, removeTodo }) => {
+            const filteredTodos = todos.filter(todo => {
+                if (filter === 'active') return !todo.completed;
+                if (filter === 'completed') return todo.completed;
+                return true;
+            });
+
+            if (filteredTodos.length === 0) {
+                return (
+                    <div className="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <h3>No todos found</h3>
+                        <p>{filter === 'completed' ? 'Complete some tasks first!' : 'Add a new task to get started'}</p>
+                    </div>
+                );
+            }
+
+            return (
+                <ul className="todo-list">
+                    {filteredTodos.map(todo => (
+                        <TodoItem 
+                            key={todo.id} 
+                            todo={todo} 
+                            onToggle={toggleTodo}
+                            onRemove={removeTodo}
+                        />
+                    ))}
+                </ul>
+            );
+        };
+
+        const mapListStateToProps = (state) => ({
+            todos: state.todos,
+            filter: state.filter
+        });
+
+        const mapListDispatchToProps = {
+            toggleTodo,
+            removeTodo
+        };
+
+        const ConnectedTodoList = connect(mapListStateToProps, mapListDispatchToProps)(TodoList);
+
+        // FilterTabs Component
+        const FilterTabs = ({ currentFilter, setFilter }) => {
+            const filters = [
+                { key: 'all', label: 'All' },
+                { key: 'active', label: 'Active' },
+                { key: 'completed', label: 'Completed' }
+            ];
+
+            return (
+                <div className="filter-tabs">
+                    {filters.map(({ key, label }) => (
+                        <button
+                            key={key}
+                            className={`filter-tab ${currentFilter === key ? 'active' : ''}`}
+                            onClick={() => setFilter(key)}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            );
+        };
+
+        const mapFilterStateToProps = (state) => ({
+            currentFilter: state.filter
+        });
+
+        const ConnectedFilterTabs = connect(mapFilterStateToProps, { setFilter })(FilterTabs);
+
+        // AddTodo Component
+        const AddTodo = ({ addTodo }) => {
+            const [text, setText] = useState('');
+            const [priority, setPriority] = useState('medium');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (text.trim()) {
+                    addTodo(text.trim(), priority);
+                    setText('');
+                    setPriority('medium');
+                }
+            };
+
+            return (
+                <form className="input-section" onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        className="todo-input"
+                        placeholder="What needs to be done?"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                    />
+                    <select 
+                        className="priority-select"
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value)}
+                    >
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <button type="submit" className="add-btn">
+                        <span>+</span>
+                        Add
+                    </button>
+                </form>
+            );
+        };
+
+        const ConnectedAddTodo = connect(null, { addTodo })(AddTodo);
+
+        // ClearCompleted Component
+        const ClearCompleted = ({ todos, clearCompleted }) => {
+            const hasCompleted = todos.some(t => t.completed);
+            if (!hasCompleted) return null;
+
+            return (
+                <button className="clear-completed" onClick={clearCompleted}>
+                    Clear Completed ({todos.filter(t => t.completed).length})
+                </button>
+            );
+        };
+
+        const mapClearStateToProps = (state) => ({
+            todos: state.todos
+        });
+
+        const ConnectedClearCompleted = connect(mapClearStateToProps, { clearCompleted })(ClearCompleted);
+
+        // Main App Component
+        const App = () => (
+            <div className="app-container">
+                <div className="header">
+                    <h1>📝 Redux Todo</h1>
+                    <p>Manage your tasks with React & Redux</p>
+                </div>
+                
+                <ConnectedStats />
+                <ConnectedAddTodo />
+                <ConnectedFilterTabs />
+                <ConnectedTodoList />
+                <ConnectedClearCompleted />
+            </div>
+        );
+
+        // ==================== RENDER ====================
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <Provider store={store}>
+                <App />
+            </Provider>
+        );
+    </script>
+</body>
+</html>
